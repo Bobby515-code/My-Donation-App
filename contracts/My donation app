@@ -1,1 +1,32 @@
-
+ // SPDX-License-Identifier: MIT
+ pragma solidity ^0.8.0;
+ 
+ contract DonationPlatform {
+    struct Donor {
+        address donorAddress;
+        uint256 amount;
+        uint256 timestamp;
+    }
+    
+    mapping(uint256 => Donor) public donations;
+    uint256 public donationCount;
+    address public owner;
+    event DonationReceived(address indexed donor, uint256 amount, uint256 donationId);
+    
+    constructor() {
+        owner = msg.sender;
+        donationCount = 0;
+    }
+    
+    function donate() public payable {
+        require(msg.value > 0, "Donation must be greater than 0");
+        donationCount++;
+        donations[donationCount] = Donor(msg.sender, msg.value, block.timestamp);
+        emit DonationReceived(msg.sender, msg.value, donationCount);
+    }
+    
+    function withdraw() public {
+        require(msg.sender == owner, "Only the owner can withdraw funds");
+        payable(owner).transfer(address(this).balance);
+    }
+ }
